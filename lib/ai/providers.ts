@@ -1,9 +1,6 @@
-import {
-  customProvider,
-  extractReasoningMiddleware,
-  wrapLanguageModel,
-} from 'ai';
-import { xai } from '@ai-sdk/xai';
+// lib/ai/providers.ts
+
+import { openai } from '@ai-sdk/openai';
 import { isTestEnvironment } from '../constants';
 import {
   artifactModel,
@@ -11,27 +8,20 @@ import {
   reasoningModel,
   titleModel,
 } from './models.test';
+import { customProvider } from 'ai';
 
+// Mantenemos los mocks para el entorno de pruebas, 
+// aunque necesitarías adaptarlos para que funcionen con la nueva estructura si los usas extensivamente.
 export const myProvider = isTestEnvironment
   ? customProvider({
       languageModels: {
-        'chat-model': chatModel,
-        'chat-model-reasoning': reasoningModel,
+        'gpt-4o-mini': chatModel, // Mapeamos los nuevos IDs a los mocks existentes
+        'gpt-4o': reasoningModel,
         'title-model': titleModel,
         'artifact-model': artifactModel,
       },
     })
-  : customProvider({
-      languageModels: {
-        'chat-model': xai('grok-2-vision-1212'),
-        'chat-model-reasoning': wrapLanguageModel({
-          model: xai('grok-3-mini-beta'),
-          middleware: extractReasoningMiddleware({ tagName: 'think' }),
-        }),
-        'title-model': xai('grok-2-1212'),
-        'artifact-model': xai('grok-2-1212'),
-      },
-      imageModels: {
-        'small-model': xai.image('grok-2-image'),
-      },
-    });
+  : openai; // <-- El cambio clave: usamos el proveedor oficial de OpenAI para producción.
+
+// Exportamos el proveedor de OpenAI directamente para usarlo en la ruta.
+export const openAIProvider = openai;

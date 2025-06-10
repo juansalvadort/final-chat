@@ -1,3 +1,6 @@
+// Arriba del todo en route.ts
+import { openAIProvider } from '@/lib/ai/providers'; 
+import { ChatModel } from '@/lib/ai/models'; // Importamos el tipo para casteo
 import {
   appendClientMessage,
   appendResponseMessages,
@@ -146,20 +149,20 @@ export async function POST(request: Request) {
 
     const stream = createDataStream({
       execute: (dataStream) => {
-        const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
-          messages,
-          maxSteps: 5,
-          experimental_activeTools:
-            selectedChatModel === 'chat-model-reasoning'
-              ? []
-              : [
-                  'getWeather',
-                  'createDocument',
-                  'updateDocument',
-                  'requestSuggestions',
-                ],
+          const result = streamText({
+            // Usamos el proveedor de OpenAI con la sintaxis de la API de Responses
+            model: openAIProvider.responses(selectedChatModel as ChatModel['id']),
+            system: systemPrompt({ selectedChatModel }),
+            messages,
+            tools: { // La forma estándar de pasar herramientas con el Vercel AI SDK
+              getWeather,
+              createDocument: createDocument({ session, dataStream }),
+              updateDocument: updateDocument({ session, dataStream }),
+              requestSuggestions: requestSuggestions({
+                session,
+                dataStream,
+              }),
+            },
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
           tools: {

@@ -52,17 +52,14 @@ About the origin of user's request:
 
 export const systemPrompt = ({
   selectedChatModel,
-  requestHints,
 }: {
   selectedChatModel: string;
-  requestHints: RequestHints;
 }) => {
-  const requestPrompt = getRequestPromptFromHints(requestHints);
-
-  if (selectedChatModel === 'chat-model-reasoning') {
-    return `${regularPrompt}\n\n${requestPrompt}`;
+  // Cambiamos la condición para que coincida con el nuevo ID del modelo de razonamiento.
+  if (selectedChatModel === 'gpt-4o') { 
+    return regularPrompt;
   } else {
-    return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
+    return `${regularPrompt}\n\n${artifactsPrompt}`;
   }
 };
 
